@@ -4,6 +4,7 @@ namespace app\models;
 
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "article".
@@ -87,10 +88,37 @@ class Article extends \yii\db\ActiveRecord
 
     public function beforeDelete(){
 
-
         $this->deleteImage();
 
         return parent::beforeDelete();
 
+    }
+
+    //function for add Category for Article
+    public function getCategory(){
+
+        return $this->hasOne(Category::className(), ['id' => 'category_id']);
+
+    }
+
+    //return list of categories for add category for Article
+    public function getListOfCategories(){
+
+      return  ArrayHelper::map(Category::find()->all(), 'id', 'title');
+
+    }
+
+    //functioin for save category of Article
+    public function saveCategory($category_id){
+
+        $category = Category::findOne($category_id);
+
+        if($category != null){
+
+            $this->link('category', $category);
+
+            return true;
+
+        }
     }
 }
