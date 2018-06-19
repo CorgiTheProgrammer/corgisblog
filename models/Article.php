@@ -66,27 +66,31 @@ class Article extends \yii\db\ActiveRecord
         ];
     }
 
-    public function saveImage($filename){
+    public function saveImage($filename)
+    {
         $this->image = $filename;
 
         return $this->save(false); // default validation is on (set value 'true'), if you want off this - set value 'false'
     }
 
     //when article was deleted this method  deleting old file from folder
-    public function deleteImage(){
+    public function deleteImage()
+    {
 
         $imageDownloadModel = new ImageDownload();
         $imageDownloadModel->deleteCurrentImage($this->image);
 
     }
 
-    public function getImage(){
+    public function getImage()
+    {
 
         return ($this->image) ? '/uploads/' . $this->image : '/no-image.gif';
 
     }
 
-    public function beforeDelete(){
+    public function beforeDelete()
+    {
 
         $this->deleteImage();
 
@@ -95,21 +99,16 @@ class Article extends \yii\db\ActiveRecord
     }
 
     //function for add Category for Article
-    public function getCategory(){
+    public function getCategory()
+    {
 
         return $this->hasOne(Category::className(), ['id' => 'category_id']);
 
     }
 
-    //return list of categories for add category for Article
-    public function getListOfCategories(){
-
-      return  ArrayHelper::map(Category::find()->all(), 'id', 'title');
-
-    }
-
     //functioin for save category of Article
-    public function saveCategory($category_id){
+    public function saveCategory($category_id)
+    {
 
         $category = Category::findOne($category_id);
 
@@ -120,5 +119,47 @@ class Article extends \yii\db\ActiveRecord
             return true;
 
         }
+    }
+
+    //for relation with tags
+    public function getTags()
+    {
+
+        return $this->hasMany(Tag::className(), ['id' => 'tag_id'])->viaTable('article_tag', ['article_id' => 'id']);
+
+    }
+
+    //function selecting tags of article
+    public function getSelectedTags()
+    {
+
+        $selectedTags = $this->getTags()->select('id')->asArray()->all();
+
+        return ArrayHelper::getColumn($selectedTags, 'id');
+
+    }
+
+    public function saveTags($tags){
+
+        if(is_array($tags))
+        {
+            $this->clearCurrentTags();
+
+            foreach($tags as $tag_id)
+            {
+                $tag = Tag::findOne($tag_id);
+
+                $this->link('tags', $tag);
+
+            }
+        }
+
+    }
+
+    public function clearCurrentTags()
+    {
+
+        ArticleTag::deleteAll(['article_id'=>$this->id]);
+
     }
 }

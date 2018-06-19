@@ -6,6 +6,7 @@ use Yii;
 use app\models\Article;
 use app\models\ArticleSearch;
 use app\models\Category;
+use app\models\Tag;
 use app\models\ImageDownload;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -152,13 +153,14 @@ class ArticleController extends Controller
 
     }
 
-    public function actionSetCategory($id){
+    public function actionSetCategory($id)
+    {
 
         $article = $this->findModel($id);
 
         $selectedCategory = $article->category->id;
 
-        $categories = $article->getListOfCategories();
+        $categories = Category::getListOfCategories();
 
         if (Yii::$app->request->isPost){
 
@@ -172,10 +174,42 @@ class ArticleController extends Controller
         }
 
         return $this->render('category', [
+
           'article' => $article,
+
           'selectedCategory' => $selectedCategory,
+
           'categories' => $categories
+
         ]);
 
     }
+
+    public function actionSetTags($id)
+    {
+
+        $article = $this->findModel($id);
+
+        $selectedTags = $article->getSelectedTags();
+
+        $tags = Tag::getListOfTags();
+
+        if(Yii::$app->request->isPost){
+
+            $new_tags = Yii::$app->request->post('tags');
+
+            $article->saveTags($new_tags);
+
+        }
+
+        return $this->render('tags', [
+
+            'selectedTags'=>$selectedTags,
+
+            'tags'=>$tags
+
+        ]);
+
+    }
+
 }

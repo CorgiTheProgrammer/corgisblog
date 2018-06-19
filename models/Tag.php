@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "tag".
@@ -46,8 +47,20 @@ class Tag extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getArticleTags()
-    {
-        return $this->hasMany(ArticleTag::className(), ['tag_id' => 'id']);
-    }
+
+     //for relation with articles
+     public function getArticles()
+     {
+
+         return $this->hasMany(Article::className(), ['id' => 'article_id'])->viaTable('article_tag', ['tag_id' => 'id']);
+
+     }
+
+     //return list of categories for add category for Article
+     public function getListOfTags()
+     {
+
+         return  ArrayHelper::map(Tag::find()->all(), 'id', 'title');
+
+     }
 }
